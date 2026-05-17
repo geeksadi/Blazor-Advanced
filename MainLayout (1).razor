@@ -1,0 +1,8 @@
+@inherits LayoutComponentBase
+@inject BlazorDemo.Models.AppTheme Theme
+
+<CascadingValue Value="Theme">
+    <div class="app-shell" style="background:@Theme.BackgroundColor; color:@Theme.TextColor; min-height:100vh;">
+        @Body
+    </div>
+</CascadingValue>

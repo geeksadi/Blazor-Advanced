@@ -1,0 +1,22 @@
+@using BlazorDemo.Models
+
+<div class="profile-card" style="border-color:@Theme.PrimaryColor">
+    <h3 style="color:@Theme.PrimaryColor">👤 Картка профілю</h3>
+    <p><strong>Ім'я:</strong> @(string.IsNullOrWhiteSpace(Profile.Name) ? "—" : Profile.Name)</p>
+    <p><strong>Email:</strong> @(string.IsNullOrWhiteSpace(Profile.Email) ? "—" : Profile.Email)</p>
+    <p><strong>Вік:</strong> @Profile.Age</p>
+    <p><strong>Мова:</strong> @Profile.Language</p>
+    <p class="theme-info">
+        🎨 Тема: <strong>@(Theme.IsDarkMode ? "Темна" : "Світла")</strong>
+        — колір: <span style="color:@Theme.PrimaryColor">@Theme.PrimaryColor</span>
+    </p>
+</div>
+
+@code {
+    // Cascading value — отримується автоматично з MainLayout
+    [CascadingParameter]
+    public AppTheme Theme { get; set; } = new();
+
+    [Parameter]
+    public UserProfile Profile { get; set; } = new();
+}

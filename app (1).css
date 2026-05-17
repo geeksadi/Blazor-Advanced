@@ -1,0 +1,113 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: background 0.3s, color 0.3s;
+}
+
+.app-shell { transition: background 0.3s, color 0.3s; }
+
+.demo-page {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+}
+
+/* Header */
+.page-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.page-header h1 { font-size: 36px; font-weight: 800; margin-bottom: 8px; }
+.subtitle { font-size: 15px; opacity: 0.65; margin-bottom: 20px; }
+
+.btn-theme {
+    padding: 10px 24px;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.btn-theme:hover { opacity: 0.85; }
+
+/* Sections */
+.demo-section {
+    background: rgba(128,128,128,0.07);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+    border: 1.5px solid rgba(128,128,128,0.15);
+}
+.demo-section h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.section-desc { font-size: 14px; opacity: 0.65; margin-bottom: 20px; }
+.section-desc code {
+    background: rgba(128,128,128,0.15);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+}
+
+/* Form */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+@media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 13px; font-weight: 600; opacity: 0.75; }
+.form-group input,
+.form-group select {
+    padding: 10px 14px;
+    border: 2px solid rgba(128,128,128,0.2);
+    border-radius: 10px;
+    font-size: 15px;
+    background: transparent;
+    color: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.form-group input:focus,
+.form-group select:focus { border-color: #5c6bc0; }
+.form-group input[type="range"] { padding: 4px 0; border: none; }
+
+/* Profile card */
+.profile-card {
+    border: 2px solid;
+    border-radius: 14px;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.profile-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.profile-card p  { font-size: 14px; opacity: 0.85; }
+.theme-info { margin-top: 8px; font-size: 13px !important; opacity: 0.7 !important; }
+
+/* Buttons */
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.btn-demo {
+    padding: 10px 18px;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.btn-demo:hover { opacity: 0.85; }
+
+/* Result box */
+.result-box {
+    background: rgba(128,128,128,0.1);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 14px;
+}
+.result-box ul { margin-top: 8px; padding-left: 20px; }
+.result-box li { margin-bottom: 4px; font-family: monospace; font-size: 13px; }

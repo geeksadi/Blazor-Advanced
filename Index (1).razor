@@ -1,0 +1,231 @@
+@page "/"
+@using BlazorDemo.Models
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@inject AppTheme ThemeService
+
+<div class="demo-page">
+
+    <div class="page-header">
+        <h1>🚀 Blazor Demo</h1>
+        <p class="subtitle">Two-way binding · Cascading Value · JS↔C# Interop</p>
+        <button class="btn-theme" @onclick="ToggleTheme"
+                style="background:@ThemeService.PrimaryColor">
+            @(ThemeService.IsDarkMode ? "☀️ Світла тема" : "🌙 Темна тема")
+        </button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- 1. TWO-WAY BINDING                                  -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <section class="demo-section">
+        <h2>1️⃣ Two-way Binding</h2>
+        <p class="section-desc">Зміни у полях миттєво відображаються у картці профілю нижче.</p>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Ім'я</label>
+                <input @bind="profile.Name" @bind:event="oninput" placeholder="Введіть ім'я" />
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input @bind="profile.Email" @bind:event="oninput" placeholder="email@example.com" />
+            </div>
+            <div class="form-group">
+                <label>Вік: <strong>@profile.Age</strong></label>
+                <input type="range" min="1" max="100" @bind="profile.Age" @bind:event="oninput" />
+            </div>
+            <div class="form-group">
+                <label>Мова</label>
+                <select @bind="profile.Language">
+                    <option>Ukrainian</option>
+                    <option>English</option>
+                    <option>Polish</option>
+                    <option>German</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- 2. CASCADING VALUE                                  -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <section class="demo-section">
+        <h2>2️⃣ Cascading Value</h2>
+        <p class="section-desc">
+            <code>AppTheme</code> передається через <code>CascadingValue</code> з MainLayout
+            у дочірній компонент <code>ProfileCard</code> без явного параметра.
+        </p>
+        <ProfileCard Profile="profile" />
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- 3. ВИКЛИК JS З C#                                   -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <section class="demo-section">
+        <h2>3️⃣ Виклик JS з C#</h2>
+        <p class="section-desc">C# викликає JavaScript функції через <code>IJSRuntime</code>.</p>
+
+        <div class="btn-row">
+            <button class="btn-demo" @onclick="ShowAlert"
+                    style="background:@ThemeService.PrimaryColor">
+                📢 JS alert()
+            </button>
+            <button class="btn-demo" @onclick="ShowConfirm"
+                    style="background:@ThemeService.PrimaryColor">
+                ❓ JS confirm()
+            </button>
+            <button class="btn-demo" @onclick="ScrollToTop"
+                    style="background:@ThemeService.PrimaryColor">
+                ⬆️ Scroll to top
+            </button>
+            <button class="btn-demo" @onclick="GetWindowSize"
+                    style="background:@ThemeService.PrimaryColor">
+                📐 Window size
+            </button>
+            <button class="btn-demo" @onclick="CopyToClipboard"
+                    style="background:@ThemeService.PrimaryColor">
+                📋 Copy profile
+            </button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(jsResult))
+        {
+            <div class="result-box">
+                <strong>Результат:</strong> @jsResult
+            </div>
+        }
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- 4. ВИКЛИК C# З JS                                   -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <section class="demo-section">
+        <h2>4️⃣ Виклик C# з JS</h2>
+        <p class="section-desc">
+            JavaScript викликає C# методи через <code>DotNetObjectReference</code>.
+            Натисніть кнопку — JS виклик спрацює через 1.5 секунди.
+        </p>
+
+        <div class="btn-row">
+            <button class="btn-demo" @onclick="RegisterAndCallFromJS"
+                    style="background:@ThemeService.PrimaryColor">
+                ⏱️ JS → викликати C# через 1.5с
+            </button>
+            <button class="btn-demo" @onclick="StartJsTimer"
+                    style="background:@ThemeService.PrimaryColor">
+                🔔 JS таймер (кожні 2с)
+            </button>
+            <button class="btn-demo" @onclick="StopJsTimer"
+                    style="background:@ThemeService.PrimaryColor; opacity:0.8">
+                ⏹️ Зупинити таймер
+            </button>
+        </div>
+
+        @if (jsCallbacks.Count > 0)
+        {
+            <div class="result-box">
+                <strong>Повідомлення від JS:</strong>
+                <ul>
+                    @foreach (var msg in jsCallbacks)
+                    {
+                        <li>@msg</li>
+                    }
+                </ul>
+            </div>
+        }
+    </section>
+
+</div>
+
+@code {
+    // ── Cascading parameter ─────────────────────────────────────────────
+    [CascadingParameter]
+    public AppTheme Theme { get; set; } = new();
+
+    // ── Two-way binding model ───────────────────────────────────────────
+    private UserProfile profile = new();
+
+    // ── JS interop state ────────────────────────────────────────────────
+    private string        jsResult   = string.Empty;
+    private List<string>  jsCallbacks = new();
+    private DotNetObjectReference<Index>? dotNetRef;
+
+    protected override void OnInitialized()
+    {
+        dotNetRef = DotNetObjectReference.Create(this);
+    }
+
+    // ── Theme toggle ────────────────────────────────────────────────────
+    private void ToggleTheme()
+    {
+        ThemeService.ToggleDarkMode();
+        StateHasChanged();
+    }
+
+    // ── 3. Виклик JS з C# ───────────────────────────────────────────────
+
+    private async Task ShowAlert()
+    {
+        await JS.InvokeVoidAsync("alert", $"Привіт, {(string.IsNullOrWhiteSpace(profile.Name) ? "Гість" : profile.Name)}! 👋");
+    }
+
+    private async Task ShowConfirm()
+    {
+        bool result = await JS.InvokeAsync<bool>("confirm", "Ви задоволені додатком?");
+        jsResult = result ? "✅ Користувач натиснув OK" : "❌ Користувач натиснув Cancel";
+    }
+
+    private async Task ScrollToTop()
+    {
+        await JS.InvokeVoidAsync("blazorInterop.scrollToTop");
+        jsResult = "⬆️ Прокручено до початку сторінки";
+    }
+
+    private async Task GetWindowSize()
+    {
+        var size = await JS.InvokeAsync<WindowSize>("blazorInterop.getWindowSize");
+        jsResult = $"📐 Розмір вікна: {size.Width} × {size.Height} px";
+    }
+
+    private async Task CopyToClipboard()
+    {
+        string text = $"Ім'я: {profile.Name}, Email: {profile.Email}, Вік: {profile.Age}";
+        await JS.InvokeVoidAsync("blazorInterop.copyToClipboard", text);
+        jsResult = "📋 Профіль скопійовано в буфер обміну!";
+    }
+
+    // ── 4. Виклик C# з JS ───────────────────────────────────────────────
+
+    private async Task RegisterAndCallFromJS()
+    {
+        await JS.InvokeVoidAsync("blazorInterop.callDotNetDelayed", dotNetRef, 1500);
+        jsResult = "⏳ JS отримав посилання, викличе C# через 1.5с...";
+    }
+
+    private async Task StartJsTimer()
+    {
+        await JS.InvokeVoidAsync("blazorInterop.startTimer", dotNetRef);
+        jsResult = "🔔 Таймер запущено — JS викликатиме C# кожні 2 секунди";
+    }
+
+    private async Task StopJsTimer()
+    {
+        await JS.InvokeVoidAsync("blazorInterop.stopTimer");
+        jsResult = "⏹️ Таймер зупинено";
+    }
+
+    // Цей метод викликає JavaScript
+    [JSInvokable]
+    public void OnCalledFromJs(string message)
+    {
+        jsCallbacks.Insert(0, $"[{DateTime.Now:HH:mm:ss}] {message}");
+        if (jsCallbacks.Count > 5) jsCallbacks.RemoveAt(jsCallbacks.Count - 1);
+        StateHasChanged();
+    }
+
+    public void Dispose() => dotNetRef?.Dispose();
+
+    // Helper record для десеріалізації розміру вікна
+    private record WindowSize(int Width, int Height);
+}
